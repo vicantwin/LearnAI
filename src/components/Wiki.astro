@@ -1,0 +1,88 @@
+<script is:inline type="module">
+  // @ts-ignore
+  import { load } from "https://cdn.jsdelivr.net/npm/cheerio@1.0.0-rc.12/+esm";
+
+  function scrapeWikipedia() {
+    const el = document.getElementById("queryForm");
+    el.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      // @ts-ignore
+      const query = document.getElementById("query").value;
+      if (query.trim() === "") {
+        return;
+      }
+      await fetch(
+        `https://nextjs-cors-anywhere.vercel.app/api?endpoint=https://en.wikipedia.org/wiki/${query}`
+      )
+        .then((response) => response.text())
+        .then((data) => {
+          const $ = load(data); // Use "data" instead of "html"
+
+          let content = $("p")
+            .text()
+            .replace(/^\\n\\n/, "")
+            .replace(/\\n/g, "<br>")
+            .replace(/\\"/g, '"')
+            .replace(/\[[^\]]*\]/g, "");
+          document.getElementById("context").classList.remove("hidden");
+          document.getElementById("context").innerHTML =
+            content || "No results found.";
+          document.getElementById("questgen").classList.toggle("hidden");
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          document.getElementById("result").innerHTML = "An error occurred.";
+        });
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", scrapeWikipedia);
+</script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="../scripts/hf.js"></script>
+  <script src="../scripts/gradio.js"></script>
+  <style is:inline>
+    .correct-answer {
+      color: green;
+    }
+    #content * {
+      display: inline;
+      float: none;
+    }
+  </style>
+</head>
+<body class="m-5">
+  <form id="queryForm">
+    <label class="text-3xl text-accent">Enter a query to search from:</label>
+    <br />
+    <input
+      type="text"
+      id="query"
+      name="query"
+      class="border-2 mt-4 mb-4 px-5 py-[0.25rem] focus:outline-primary rounded-md"
+      required
+      autocomplete="off"
+    />
+    <button
+      type="submit"
+      class="border-2 mt-4 mb-4 px-5 py-[0.25rem] hover:text-primary hover:transition-colors rounded-md"
+      >Search</button
+    >
+    <button
+      id="questgen"
+      class="hidden border-2 mt-4 mb-4 px-5 py-[0.25rem] hover:text-secondary hover:transition-colors rounded-md"
+      >Create Questions</button
+    >
+  </form>
+  <div id="results" class="mt-4">
+    <div id="timer" style="display: none;">Time elapsed: 00:00</div>
+    <p
+      id="context"
+      class="hidden border-2 m-4 p-3 pl-4 rounded-md content-center"
+    >
+    </p>
+    <div id="quiz-container" class="hidden border-2 m-4 rounded-md p-3"></div>
+  </div>
+</body>

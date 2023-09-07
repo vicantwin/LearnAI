@@ -56,9 +56,9 @@ export default async function textrun(inputText) {
   const question = result.data[0].questions;
   console.log("Fetched! ", question);
   // Loop to generate questions and buttons
-  var quizContainer = document.getElementById("quiz-container");
+  const quizContainer = document.getElementById("quiz-container");
   question.forEach((question) => {
-    var options = [question.answer];
+    const options = [question.answer];
     question.options.forEach((option) => options.push(option.toLowerCase()));
 
     function shuffleArray(array) {
@@ -67,11 +67,11 @@ export default async function textrun(inputText) {
 
     shuffleArray(options); // Shuffle the options
 
-    var questionDiv = document.createElement("div");
+    const questionDiv = document.createElement("div");
     questionDiv.innerHTML = `<h2>${question.context}</h2><br><br><h2>${question.question_statement}</h2>`;
 
     options.forEach((option) => {
-      var button = document.createElement("button");
+      const button = document.createElement("button");
       button.textContent = option;
       button.innerHTML += "<br/>";
       button.classList =
